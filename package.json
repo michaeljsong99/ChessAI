@@ -15,12 +15,9 @@
     "react-scripts": "3.4.1"
   },
   "scripts": {
-    "dev-server": "webpack-dev-server --open",
-    "start": "node server.js",
-    "server": "nodemon index.js --ignore client",
+    "start": "react-scripts start",
     "start-api": "cd api && venv/bin/flask run --no-debugger",
-    "build": "webpack -p",
-    "heroku-postbuild": "npm run build",
+    "build": "react-scripts build",
     "test": "react-scripts test",
     "test-api": "cd api && flask test",
     "eject": "react-scripts eject",
