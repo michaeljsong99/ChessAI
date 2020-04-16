@@ -5,7 +5,7 @@ from AugmentedBoard import AugmentedBoard
 def choose_move(aboard, depth):
     try:
         move = chess.polyglot.MemoryMappedReader("Performance.bin").weighted_choice(aboard).move
-        evaluation = 'Still in Opening Book'
+        evaluation = 0
         return (evaluation, move)
     except:
         best_move = chess.Move.null()
@@ -89,8 +89,8 @@ def evaluate(alpha, beta, aboard):
 
 def computerMove(aboard, depth):
     best_move = choose_move(aboard, depth)[1]
-    evaluation = choose_move(aboard, depth)[0]
-    print ('Best move is ' + str(best_move) + ' and evaluation is: ' + str(evaluation))
+    evaluation = choose_move(aboard, depth)[0] / 100
+    print ('Best move is ' + str(best_move) + ' and evaluation is: ' + "{:.2f}".format(evaluation))
     aboard.push(best_move)
     # Now we need to clear the cache for the board.
     aboard.reset_cache()
@@ -98,6 +98,22 @@ def computerMove(aboard, depth):
     return aboard
 
 
+def return_move_json(aboard, depth):
+    best_move = choose_move(aboard, depth)[1]
+    from_square_int = best_move.from_square
+    from_square_str = str(best_move)[:2]
+    to_square_int = best_move.to_square
+    to_square_str = str(best_move)[2:4]
+    promotion = ''
+    if best_move.promotion is not None:
+        promotion = aboard.get_piece_promoted[best_move.promotion]
+    evaluation = round((choose_move(aboard, depth)[0] / 100), 2)
+    if aboard.turn == chess.BLACK:
+        evaluation = -evaluation
+    return {
+        'move': aboard.san(best_move),
+        'evaluation': evaluation
+    }
 
 
 

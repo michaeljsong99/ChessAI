@@ -29,4 +29,9 @@ def playGame():
     print("Game is over")
 
 
-playGame()
+def return_move(fen_str, depth = 2):
+    board = AugmentedBoard(fen=fen_str)
+    json_return =  return_move_json(board, depth)
+    return json_return
+
+#playGame()

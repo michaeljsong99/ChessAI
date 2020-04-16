@@ -4,6 +4,8 @@ from chess import *
 # Augmented Board also keeps track of the material advantage.
 class AugmentedBoard(Board):
 
+    piece_symbols = [None, "p", "n", "b", "r", "q", "k"]
+
     squares = [
         'A1', 'B1', 'C1', 'D1', 'E1', 'F1', 'G1', 'H1',
         'A2', 'B2', 'C2', 'D2', 'E2', 'F2', 'G2', 'H2',
@@ -231,7 +233,9 @@ class AugmentedBoard(Board):
     def reset_cache(self):
         self._cached_positions = {}
 
-
+    # Gets the type of piece promoted.
+    def get_piece_promoted(self, piece_as_int):
+        return self.piece_symbols[piece_as_int]
 
 
 
