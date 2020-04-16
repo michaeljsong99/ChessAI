@@ -39,7 +39,7 @@ class HumanVsCPU extends Component {
         player_can_move: false
     })
     const position  = this.game.fen();
-    const url = 'api/calculate/?position=' + position
+    const url = 'https://young-coast-75480.herokuapp.com/api/calculate/?position=' + position
     fetch(url)
     .then(res => res.json())
     .then(data => {

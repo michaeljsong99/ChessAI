@@ -34,4 +34,6 @@ def return_move(fen_str, depth = 2):
     json_return =  return_move_json(board, depth)
     return json_return
 
+#return_move("2rq1rk1/1p3pbp/p2pbnp1/3NpP2/B1PpP3/3P3P/PP4P1/1RBQ1RK1 b - - 0 1")
+
 #playGame()
