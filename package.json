@@ -39,5 +39,5 @@
       "last 1 safari version"
     ]
   },
-  "proxy": "https://young-coast-75480.herokuapp.com"
+  "proxy": "https://localhost:5000"
 }

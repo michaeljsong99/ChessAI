@@ -21,12 +21,37 @@ class HumanVsCPU extends Component {
     // current evaluation of the position
     evaluation: 0,
     player_can_move: true,
-    current_message: 'Your turn!'
+    current_message: 'Your turn!',
+    width: window.innerWidth,
+    height: window.innerHeight,
+    board_width: window.innerWidth,
   };
 
   componentDidMount() {
     this.game = new Chess();
+    window.addEventListener("resize", this.updateWindowDimensions);
+    this.updateWindowDimensions();
   }
+
+  componentWillUnmount() {
+    window.removeEventListener("resize", this.updateWindowDimensions)
+  }
+
+  updateWindowDimensions = () => {
+    this.setState({width: window.innerWidth,
+                   height: window.innerHeight});
+    this.getBoardWidth();
+    console.log("Resizing!");
+    console.log(this.state.board_width);
+  }
+
+  getBoardWidth = () => {
+    const min_dimension = Math.min(this.state.width * 0.8, this.state.height * 0.8)
+    const board_width = Math.min(min_dimension, 700)
+    this.setState({
+      board_width: board_width
+    });
+  };
 
   // To restart the game.
   restartGame() {
@@ -40,6 +65,7 @@ class HumanVsCPU extends Component {
     })
     const position  = this.game.fen();
     const url = 'https://young-coast-75480.herokuapp.com/api/calculate/?position=' + position
+    console.log(url)
     fetch(url)
     .then(res => res.json())
     .then(data => {
@@ -226,7 +252,7 @@ class HumanVsCPU extends Component {
     });
 
   render() {
-    const { fen, dropSquareStyle, squareStyles, evaluation, current_message } = this.state;
+    const { fen, dropSquareStyle, squareStyles, evaluation, current_message, board_width } = this.state;
 
     return this.props.children({
       squareStyles,
@@ -239,7 +265,8 @@ class HumanVsCPU extends Component {
       onSquareClick: this.onSquareClick,
       onSquareRightClick: this.onSquareRightClick,
       evaluation,
-      current_message
+      current_message,
+      board_width
     });
   }
 }
@@ -259,11 +286,12 @@ export default function WithMoveValidation() {
           onSquareClick,
           onSquareRightClick,
           evaluation,
-          current_message
+          current_message,
+          board_width
         }) => (
           <Display
             id="HumanVsCPU"
-            width={600}
+            width={board_width}
             position={position}
             onDrop={onDrop}
             onMouseOverSquare={onMouseOverSquare}
@@ -282,6 +310,7 @@ export default function WithMoveValidation() {
           />
         )}
       </HumanVsCPU>
+      
     </div>
   );
 }

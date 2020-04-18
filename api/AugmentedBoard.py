@@ -93,6 +93,9 @@ class AugmentedBoard(Board):
     # A hash map that contains < depth < position, evaluation >>
     _cached_positions = {}
 
+    # A hash map of < position, max_depth_found > that contains the position seen and its max depth.
+    _seen_positions = {}
+
 
 
     def _calculate_material(self):
@@ -128,6 +131,33 @@ class AugmentedBoard(Board):
             return eval
         else:
             return -eval
+
+    # TODO: Note: The 'attackers' method does not include the piece currently occupying the square.
+    # Returns true if a valid check can be given. Basically the same logic as is_valid_capture below.
+    def is_valid_check(self, move):
+
+        moved_from = move.from_square
+        moved_to = move.to_square
+
+        self.push(move)
+        retval = False
+        num_attackers = num_defenders = 0
+
+        if self.is_check():
+            if self.is_checkmate():
+                retval = True
+            else:
+                if self.turn == WHITE:
+                    num_attackers = len(self.attackers(color=BLACK, square=moved_to))
+                    num_defenders = len(self.attackers(color=WHITE, square=moved_to))
+                else:
+                    num_attackers = len(self.attackers(color=WHITE, square=moved_to))
+                    num_defenders = len(self.attackers(color=BLACK, square=moved_to))
+
+            if num_attackers >= num_defenders: # Note, check if attackers includes the piece currently at the square.
+                retval = True
+        self.pop()
+        return retval
 
     # Returns true if a enemy piece can be taken that has no defenders, or the enemy piece value is greater or equal to our piece.
     def is_valid_capture(self, move):
@@ -217,21 +247,55 @@ class AugmentedBoard(Board):
 
     # Add a given depth and position to our cache.
     def add_to_cache(self, depth, position, evaluation):
+
+        if abs(evaluation) == 45:
+            x = 0
+            y = x+2
         if depth not in self._cached_positions:
             self._cached_positions[depth] = {position: evaluation}
         elif position not in self._cached_positions[depth]:
             self._cached_positions[depth][position] = evaluation
 
+    def add_to_seen_positions(self, depth, position):
+        # Also add the position to our seen positions.
+        if position not in self._seen_positions:
+            self._seen_positions[position] = depth
+        else:
+            self._seen_positions[position] = max(depth, self._seen_positions[position])
+
     # Check if a given depth and position is in our cache. Returns None if the depth and position does not exist.
     def lookup_position(self, depth, position):
-        if depth in self._cached_positions:
-            if position in self._cached_positions[depth]:
-                return self._cached_positions[depth][position]
+    #     if depth in self._cached_positions:
+    #         if position in self._cached_positions[depth]:
+    #             return self._cached_positions[depth][position]
+    #         # Otherwise, we check if we have considered this position in a previous turn. If so, return 0 (repetition).
+    #         for key in self._cached_positions.keys():
+    #             # TODO: If you have a position on depth 3, you don't want to compare to the same position on depth 1 for example.
+    #             if position in self._cached_positions[key]:
+    #                 return 0
+    #     return None
+
+        greater_or_equal_depths = list(filter(lambda x: (x >= depth), self._cached_positions.keys()))
+        greater_or_equal_depths.sort(reverse=True) # Sort the depths in descending order.
+        for d in greater_or_equal_depths:
+            if position in self._cached_positions[d]:
+                return self._cached_positions[d][position] # Return the match with the highest depth.
         return None
+
+    # Checks if we have already seen the position.
+    def check_for_repetition(self, depth, position):
+        if position in self._seen_positions:
+            if depth <= self._seen_positions[position]:
+                return True
+        return False
 
     # Resets the cached_positions to be an empty hash map.
     def reset_cache(self):
         self._cached_positions = {}
+
+    # Resets the seen positions to be empty. Should be called after every move that we calculate.
+    def reset_seen_positions(self):
+        self._seen_positions = {}
 
     # Gets the type of piece promoted.
     def get_piece_promoted(self, piece_as_int):
